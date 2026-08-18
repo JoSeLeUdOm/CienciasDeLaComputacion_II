@@ -79,5 +79,16 @@ public class BTreeNode {
         keys[i] = y.keys[t - 1];
         n++;
     }
+    public void printInOrder() {
+        int i;
 
+        for (i = 0; i < n; i++) {
+            if (!leaf)
+                children[i].printInOrder();
+            System.out.print(keys[i] + " ");
+        }
+
+        if (!leaf)
+            children[i].printInOrder();
+    }
 }
