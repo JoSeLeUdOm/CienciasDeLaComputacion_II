@@ -9,10 +9,10 @@ package udistrital.edu.co.model;
  * @author josep
  */
 public class NumerosPseudoaleatorios {
-    public double semilla;
-    public int multiplicador;
-    public int modulo;
-    public int incremento;
+    public long semilla;
+    public long multiplicador;
+    public long modulo;
+    public long incremento;
 
    
     
