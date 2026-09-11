@@ -21,7 +21,7 @@ public class Convertir32Bits {
             String binario = Integer.toBinaryString(ascii);
 
             //Rellenar con ceros a la izquierda para completar 32 bits
-            String binario32Bits = String.format("%32s", binario).replace(' ', '0');
+            String binario32Bits = String.format("%32s", binario).replace(' ', '1');
 
             //Juntar la cadena de bits
             resultadoCompleto.append(binario32Bits);
@@ -31,11 +31,10 @@ public class Convertir32Bits {
         }
         return resultadoCompleto;
     }
-    public static String[] dividirArreglo(StringBuilder sb){
+    public static String[] dividirArreglo(StringBuilder sb, int tamanoBloque){
 
         // 1. Calcular la cantidad de fragmentos necesarios
         int longitudTotal = sb.length();
-        int tamanoBloque = 16;
         int cantidadBloques = (int) Math.ceil((double) longitudTotal / tamanoBloque);
 
         String[] resultado = new String[cantidadBloques];
@@ -105,35 +104,64 @@ public class Convertir32Bits {
     //Paso 6: repite el ciclo "desmadre (paso 4) + xor con el siguiente bloque (paso 5)"
     //hasta recorrer todos los bloques del arreglo, y devuelve la palabra final de 16 bits (el hash)
     public static String encadenarBloques(String[] bloques){
-        //Arrancamos con el primer bloque ya "desmadrado" (esto es el paso 4 sobre el elemento inicial)
+        // Validación de seguridad por si el arreglo viene vacío
+        if (bloques == null || bloques.length == 0) {
+            return "";
+        }
+
+        // Usamos StringBuilder para ir uniendo (concatenando) todos los bloques
+        StringBuilder bloquesJuntos = new StringBuilder();
+
+        // Arrancamos con el primer bloque ya "desmadrado" (esto es el paso 4 sobre el elemento inicial)
         String acumulado = desmadreBloque(bloques[0]);
         System.out.println("Desmadre inicial (bloque 0): [" + acumulado + "]");
 
+        // Guardamos el primer bloque procesado en nuestra cadena final (primeros 32 caracteres)
+        bloquesJuntos.append(acumulado);
+
         for (int i = 1; i < bloques.length; i++) {
-            //Paso 5: xor del acumulado con el siguiente bloque del arreglo
+            // Paso 5: xor del acumulado con el siguiente bloque del arreglo
             acumulado = xorBloques(acumulado, bloques[i]);
             System.out.println("Paso 5 - XOR con bloque " + i + ": [" + acumulado + "]");
 
-            //Si quedan más bloques por mezclar, se vuelve a "desmadrar" el resultado (paso 4)
-            //antes de continuar con el siguiente XOR (paso 5 otra vez)
+            // Si quedan más bloques por mezclar, se vuelve a "desmadrar" el resultado (paso 4)
             if (i < bloques.length - 1) {
                 acumulado = desmadreBloque(acumulado);
                 System.out.println("Paso 6 - Desmadre repetido: [" + acumulado + "]");
             }
+
+            // Añadimos el bloque actual (ya procesado) a la cadena final
+            bloquesJuntos.append(acumulado);
         }
 
-        return acumulado;
+        // Devuelve todos los bloques concatenados (ej: si son 3 bloques, devuelve 96 caracteres)
+        return bloquesJuntos.toString();
     }
 
+    //Convertir hash a texto
 
+    public static String convertiraTexto(String[] cadena){
+        StringBuilder hexString = new StringBuilder();
+        for (String bloque : cadena) {
+            int valorEntero = Integer.parseUnsignedInt(bloque, 2);
+            // Convertir cada bloque binario a entero usando base 2
+            String hex = String.format("%02x", valorEntero);
+            hexString.append(hex);
+        }
+        return hexString.toString();
+
+    }
     public static void main(String[] args) {
         java.lang.StringBuilder ps1= convertir32Bytes();
-        String[] ps2=dividirArreglo(ps1);
+        String[] ps2=dividirArreglo(ps1,16);
         System.out.println("Paso 3");
         String[] ps3=cambioPrimerElemento(ps2);
 
         System.out.println("Pasos 5 y 6");
-        String hashFinal = encadenarBloques(ps3);
+        String hashFinalBin = encadenarBloques(ps3);
+        String[] hashbloque16=dividirArreglo(new StringBuilder(hashFinalBin),16);
+
+        String hashFinal=convertiraTexto(hashbloque16);
         System.out.println("Hash final (16 bits): [" + hashFinal + "]");
 
 
