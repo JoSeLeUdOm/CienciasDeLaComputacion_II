@@ -166,7 +166,7 @@ public class Hashing {
     }
     public static void main(String[] args) {
 
-        System.out.println("Hash final (16 bits): [" + Hash() + "]");
+        System.out.println("Hash final: [" + Hash() + "]");
 
 
     }
